@@ -6,14 +6,20 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		438113B22F4B3DAA0062BCBF /* RxFlow in Frameworks */ = {isa = PBXBuildFile; productRef = 438113B12F4B3DAA0062BCBF /* RxFlow */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		433C833F2F4A980A005DE144 /* SwiftSampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftSampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		433C83512F4A980B005DE144 /* Exceptions for "SwiftSampleApp" folder in "SwiftSampleApp" target */ = {
+		4381138B2F4B3C9E0062BCBF /* Exceptions for "SwiftSampleApp" folder in "SwiftSampleApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Features/README.md,
+				Flows/README.md,
 				Info.plist,
 			);
 			target = 433C833E2F4A980A005DE144 /* SwiftSampleApp */;
@@ -21,10 +27,10 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		433C83412F4A980A005DE144 /* SwiftSampleApp */ = {
+		438113842F4B3C9E0062BCBF /* SwiftSampleApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				433C83512F4A980B005DE144 /* Exceptions for "SwiftSampleApp" folder in "SwiftSampleApp" target */,
+				4381138B2F4B3C9E0062BCBF /* Exceptions for "SwiftSampleApp" folder in "SwiftSampleApp" target */,
 			);
 			path = SwiftSampleApp;
 			sourceTree = "<group>";
@@ -36,6 +42,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				438113B22F4B3DAA0062BCBF /* RxFlow in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -45,7 +52,7 @@
 		433C83362F4A980A005DE144 = {
 			isa = PBXGroup;
 			children = (
-				433C83412F4A980A005DE144 /* SwiftSampleApp */,
+				438113842F4B3C9E0062BCBF /* SwiftSampleApp */,
 				433C83402F4A980A005DE144 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -74,10 +81,11 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				433C83412F4A980A005DE144 /* SwiftSampleApp */,
+				438113842F4B3C9E0062BCBF /* SwiftSampleApp */,
 			);
 			name = SwiftSampleApp;
 			packageProductDependencies = (
+				438113B12F4B3DAA0062BCBF /* RxFlow */,
 			);
 			productName = SwiftSampleApp;
 			productReference = 433C833F2F4A980A005DE144 /* SwiftSampleApp.app */;
@@ -107,6 +115,10 @@
 			);
 			mainGroup = 433C83362F4A980A005DE144;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				438113B02F4B3DAA0062BCBF /* XCRemoteSwiftPackageReference "RxFlow" */,
+				438113E12F4B3F140062BCBF /* XCRemoteSwiftPackageReference "RxSwift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 433C83402F4A980A005DE144 /* Products */;
 			projectDirPath = "";
@@ -150,7 +162,6 @@
 				INFOPLIST_FILE = SwiftSampleApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -182,7 +193,6 @@
 				INFOPLIST_FILE = SwiftSampleApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -345,6 +355,33 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		438113B02F4B3DAA0062BCBF /* XCRemoteSwiftPackageReference "RxFlow" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RxSwiftCommunity/RxFlow.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.13.2;
+			};
+		};
+		438113E12F4B3F140062BCBF /* XCRemoteSwiftPackageReference "RxSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ReactiveX/RxSwift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.10.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		438113B12F4B3DAA0062BCBF /* RxFlow */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 438113B02F4B3DAA0062BCBF /* XCRemoteSwiftPackageReference "RxFlow" */;
+			productName = RxFlow;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 433C83372F4A980A005DE144 /* Project object */;
 }

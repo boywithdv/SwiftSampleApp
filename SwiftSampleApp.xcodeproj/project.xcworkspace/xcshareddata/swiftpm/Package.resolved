@@ -1,0 +1,24 @@
+{
+  "originHash" : "b6d571447ee71c38e69fbf5e5fb82a470de2ab8b3f5571e2e8b9510eeefd7a49",
+  "pins" : [
+    {
+      "identity" : "rxflow",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RxSwiftCommunity/RxFlow.git",
+      "state" : {
+        "revision" : "26b3e8137c6d7a1dbd98a599b3ccb1e4314293c5",
+        "version" : "2.13.2"
+      }
+    },
+    {
+      "identity" : "rxswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ReactiveX/RxSwift.git",
+      "state" : {
+        "revision" : "5734ad2b6d7d4c0656df3d09ca4ce54fa3c09913",
+        "version" : "6.10.1"
+      }
+    }
+  ],
+  "version" : 3
+}
