@@ -45,8 +45,23 @@ class HomeFlow: Flow {
     }
 
     private func navigateToTileDetail(item: HomeTileItem) -> FlowContributors {
-        let viewModel = TileDetailViewModel(item: item)
-        let viewController = TileDetailHostingViewController(viewModel: viewModel)
+        switch item {
+        case .rxSwiftLearning:
+            return navigateToRxSwiftLearning()
+        default:
+            let viewModel = TileDetailViewModel(item: item)
+            let viewController = TileDetailHostingViewController(viewModel: viewModel)
+            rootViewController.pushViewController(viewController, animated: true)
+            return .one(flowContributor: .contribute(
+                withNextPresentable: viewController,
+                withNextStepper: viewModel
+            ))
+        }
+    }
+
+    private func navigateToRxSwiftLearning() -> FlowContributors {
+        let viewModel = RxSwiftLearningViewModel()
+        let viewController = RxSwiftLearningHostingViewController(viewModel: viewModel)
         rootViewController.pushViewController(viewController, animated: true)
         return .one(flowContributor: .contribute(
             withNextPresentable: viewController,
