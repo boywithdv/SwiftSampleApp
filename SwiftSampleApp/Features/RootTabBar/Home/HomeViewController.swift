@@ -51,6 +51,12 @@ class HomeViewController: UIViewController, Stepper {
         iconName: "clock.fill"
     )
 
+    private lazy var rxSwiftCard = CardView(
+        title: "RxSwift学習",
+        description: "演算子の動きをログで確認",
+        iconName: "waveform"
+    )
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,6 +76,7 @@ class HomeViewController: UIViewController, Stepper {
         contentStackView.addArrangedSubview(reservationCard)
         contentStackView.addArrangedSubview(favoriteCard)
         contentStackView.addArrangedSubview(historyCard)
+        contentStackView.addArrangedSubview(rxSwiftCard)
 
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -88,6 +95,7 @@ class HomeViewController: UIViewController, Stepper {
         reservationCard.heightAnchor.constraint(equalToConstant: 80).isActive = true
         favoriteCard.heightAnchor.constraint(equalToConstant: 80).isActive = true
         historyCard.heightAnchor.constraint(equalToConstant: 80).isActive = true
+        rxSwiftCard.heightAnchor.constraint(equalToConstant: 80).isActive = true
     }
 
     // MARK: - Bindings
@@ -107,6 +115,12 @@ class HomeViewController: UIViewController, Stepper {
         historyCard.tapGesture.rx.event
             .subscribe(onNext: { [weak self] _ in
                 self?.steps.accept(AppStep.tileDetail(.browsing))
+            })
+            .disposed(by: disposeBag)
+
+        rxSwiftCard.tapGesture.rx.event
+            .subscribe(onNext: { [weak self] _ in
+                self?.steps.accept(AppStep.tileDetail(.rxSwiftLearning))
             })
             .disposed(by: disposeBag)
     }
