@@ -57,6 +57,12 @@ class HomeViewController: UIViewController, Stepper {
         iconName: "waveform"
     )
 
+    private lazy var combineCard = CardView(
+        title: "Combine学習",
+        description: "Apple純正フレームワークを体験",
+        iconName: "dot.radiowaves.left.and.right"
+    )
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -77,6 +83,7 @@ class HomeViewController: UIViewController, Stepper {
         contentStackView.addArrangedSubview(favoriteCard)
         contentStackView.addArrangedSubview(historyCard)
         contentStackView.addArrangedSubview(rxSwiftCard)
+        contentStackView.addArrangedSubview(combineCard)
 
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -96,6 +103,7 @@ class HomeViewController: UIViewController, Stepper {
         favoriteCard.heightAnchor.constraint(equalToConstant: 80).isActive = true
         historyCard.heightAnchor.constraint(equalToConstant: 80).isActive = true
         rxSwiftCard.heightAnchor.constraint(equalToConstant: 80).isActive = true
+        combineCard.heightAnchor.constraint(equalToConstant: 80).isActive = true
     }
 
     // MARK: - Bindings
@@ -121,6 +129,12 @@ class HomeViewController: UIViewController, Stepper {
         rxSwiftCard.tapGesture.rx.event
             .subscribe(onNext: { [weak self] _ in
                 self?.steps.accept(AppStep.tileDetail(.rxSwiftLearning))
+            })
+            .disposed(by: disposeBag)
+
+        combineCard.tapGesture.rx.event
+            .subscribe(onNext: { [weak self] _ in
+                self?.steps.accept(AppStep.tileDetail(.combineLearning))
             })
             .disposed(by: disposeBag)
     }

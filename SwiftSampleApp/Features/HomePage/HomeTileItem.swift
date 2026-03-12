@@ -11,6 +11,7 @@ enum HomeTileItem {
     case favorite
     case browsing
     case rxSwiftLearning
+    case combineLearning
 
     var title: String {
         switch self {
@@ -18,6 +19,7 @@ enum HomeTileItem {
         case .favorite: return "お気に入り"
         case .browsing: return "閲覧履歴"
         case .rxSwiftLearning: return "RxSwift学習"
+        case .combineLearning: return "Combine学習"
         }
     }
 
@@ -27,6 +29,7 @@ enum HomeTileItem {
         case .favorite: return "お気に入りのサロンを確認"
         case .browsing: return "最近見たサロンをチェック"
         case .rxSwiftLearning: return "演算子の動きをログで確認"
+        case .combineLearning: return "Apple純正フレームワークを体験"
         }
     }
 
@@ -36,6 +39,7 @@ enum HomeTileItem {
         case .favorite: return "heart.fill"
         case .browsing: return "clock.fill"
         case .rxSwiftLearning: return "waveform"
+        case .combineLearning: return "dot.radiowaves.left.and.right"
         }
     }
 }
