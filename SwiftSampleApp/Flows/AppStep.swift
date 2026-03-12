@@ -26,4 +26,7 @@ enum AppStep: Step {
     case reservation
     case favorite
     case myPage
+
+    // ホームタイルからの詳細画面遷移
+    case tileDetail(HomeTileItem)
 }

@@ -92,25 +92,21 @@ class HomeViewController: UIViewController, Stepper {
 
     // MARK: - Bindings
     private func setupBindings() {
-        // カードタップ時の処理をバインド
         reservationCard.tapGesture.rx.event
             .subscribe(onNext: { [weak self] _ in
-                print("予約カードがタップされました")
-                // TODO: 予約画面への遷移を実装
+                self?.steps.accept(AppStep.tileDetail(.reservation))
             })
             .disposed(by: disposeBag)
 
         favoriteCard.tapGesture.rx.event
             .subscribe(onNext: { [weak self] _ in
-                print("お気に入りカードがタップされました")
-                // TODO: お気に入り画面への遷移を実装
+                self?.steps.accept(AppStep.tileDetail(.favorite))
             })
             .disposed(by: disposeBag)
 
         historyCard.tapGesture.rx.event
             .subscribe(onNext: { [weak self] _ in
-                print("履歴カードがタップされました")
-                // TODO: 履歴画面への遷移を実装
+                self?.steps.accept(AppStep.tileDetail(.browsing))
             })
             .disposed(by: disposeBag)
     }
