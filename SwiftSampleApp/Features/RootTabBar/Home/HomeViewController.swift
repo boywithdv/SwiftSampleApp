@@ -63,6 +63,12 @@ class HomeViewController: UIViewController, Stepper {
         iconName: "dot.radiowaves.left.and.right"
     )
 
+    private lazy var rxSwiftStateFlowCard = CardView(
+        title: "状態フロー可視化",
+        description: "Relayの値がSubscriberへ流れる様子を可視化",
+        iconName: "arrow.triangle.pull"
+    )
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -84,6 +90,7 @@ class HomeViewController: UIViewController, Stepper {
         contentStackView.addArrangedSubview(historyCard)
         contentStackView.addArrangedSubview(rxSwiftCard)
         contentStackView.addArrangedSubview(combineCard)
+        contentStackView.addArrangedSubview(rxSwiftStateFlowCard)
 
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -104,6 +111,7 @@ class HomeViewController: UIViewController, Stepper {
         historyCard.heightAnchor.constraint(equalToConstant: 80).isActive = true
         rxSwiftCard.heightAnchor.constraint(equalToConstant: 80).isActive = true
         combineCard.heightAnchor.constraint(equalToConstant: 80).isActive = true
+        rxSwiftStateFlowCard.heightAnchor.constraint(equalToConstant: 80).isActive = true
     }
 
     // MARK: - Bindings
@@ -135,6 +143,12 @@ class HomeViewController: UIViewController, Stepper {
         combineCard.tapGesture.rx.event
             .subscribe(onNext: { [weak self] _ in
                 self?.steps.accept(AppStep.tileDetail(.combineLearning))
+            })
+            .disposed(by: disposeBag)
+
+        rxSwiftStateFlowCard.tapGesture.rx.event
+            .subscribe(onNext: { [weak self] _ in
+                self?.steps.accept(AppStep.tileDetail(.rxSwiftStateFlow))
             })
             .disposed(by: disposeBag)
     }

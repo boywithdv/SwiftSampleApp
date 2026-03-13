@@ -12,6 +12,7 @@ enum HomeTileItem {
     case browsing
     case rxSwiftLearning
     case combineLearning
+    case rxSwiftStateFlow
 
     var title: String {
         switch self {
@@ -20,6 +21,7 @@ enum HomeTileItem {
         case .browsing: return "閲覧履歴"
         case .rxSwiftLearning: return "RxSwift学習"
         case .combineLearning: return "Combine学習"
+        case .rxSwiftStateFlow: return "状態フロー可視化"
         }
     }
 
@@ -30,6 +32,7 @@ enum HomeTileItem {
         case .browsing: return "最近見たサロンをチェック"
         case .rxSwiftLearning: return "演算子の動きをログで確認"
         case .combineLearning: return "Apple純正フレームワークを体験"
+        case .rxSwiftStateFlow: return "Relayの値がSubscriberへ流れる様子を可視化"
         }
     }
 
@@ -40,6 +43,7 @@ enum HomeTileItem {
         case .browsing: return "clock.fill"
         case .rxSwiftLearning: return "waveform"
         case .combineLearning: return "dot.radiowaves.left.and.right"
+        case .rxSwiftStateFlow: return "arrow.triangle.pull"
         }
     }
 }

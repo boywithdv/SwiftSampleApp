@@ -50,6 +50,8 @@ class HomeFlow: Flow {
             return navigateToRxSwiftLearning()
         case .combineLearning:
             return navigateToCombineLearning()
+        case .rxSwiftStateFlow:
+            return navigateToRxSwiftStateFlow()
         default:
             let viewModel = TileDetailViewModel(item: item)
             let viewController = TileDetailHostingViewController(viewModel: viewModel)
@@ -74,6 +76,16 @@ class HomeFlow: Flow {
     private func navigateToCombineLearning() -> FlowContributors {
         let viewModel = CombineLearningViewModel()
         let viewController = CombineLearningHostingViewController(viewModel: viewModel)
+        rootViewController.pushViewController(viewController, animated: true)
+        return .one(flowContributor: .contribute(
+            withNextPresentable: viewController,
+            withNextStepper: viewModel
+        ))
+    }
+
+    private func navigateToRxSwiftStateFlow() -> FlowContributors {
+        let viewModel = RxSwiftStateFlowViewModel()
+        let viewController = RxSwiftStateFlowHostingViewController(viewModel: viewModel)
         rootViewController.pushViewController(viewController, animated: true)
         return .one(flowContributor: .contribute(
             withNextPresentable: viewController,
