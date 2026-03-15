@@ -24,13 +24,20 @@ extension CombineLogCategory {
 
 struct CombineLearningView: View {
 
+    /// @StateObject => ViewModel のライフサイクルを View に紐づけるためのプロパティラッパー
+    /// ViewModel は ObservableObject プロトコルに準拠している必要がある
+    /// このプロパティラッパーを使うことで、ViewModel 内の @Published プロパティが変更されたときに View が自動的に更新されるようになる
     @StateObject private var viewModel: CombineLearningViewModel
 
+    /// ViewModel を引数に取るイニシャライザ
+    /// StateObject は View の初期化時に一度だけ ViewModel を作成するため、イニシャライザで引数を受け取る必要がある
     init(viewModel: CombineLearningViewModel) {
+        /// StateObject(wrappedValue:) を使って ViewModel を StateObject として初期化
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
     var body: some View {
+        /// GeometryReader を使って、親ビューのサイズを取得し、子ビューのレイアウトに活用する
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 operatorSection

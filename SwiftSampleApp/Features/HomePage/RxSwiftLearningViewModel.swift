@@ -7,7 +7,6 @@ import Foundation
 import Combine
 import RxSwift
 import RxCocoa
-import RxFlow
 import os
 
 private let log = Logger(
@@ -29,10 +28,7 @@ struct LogEntry: Identifiable {
 
 // MARK: - ViewModel
 
-final class RxSwiftLearningViewModel: ObservableObject, Stepper {
-
-    // MARK: - Stepper
-    let steps = PublishRelay<Step>()
+final class RxSwiftLearningViewModel: BaseViewModel, ObservableObject {
 
     // MARK: - Published
     @Published private(set) var logMessages: [LogEntry] = []
@@ -49,7 +45,8 @@ final class RxSwiftLearningViewModel: ObservableObject, Stepper {
     private var combineCounter2 = 0
 
     // MARK: - Initialization
-    init() {
+    override init() {
+        super.init()
         setupBindings()
     }
 

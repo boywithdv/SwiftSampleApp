@@ -7,13 +7,8 @@
 
 import Foundation
 import Combine
-import RxFlow
-import RxCocoa
 
-final class TileDetailViewModel: ObservableObject, Stepper {
-
-    // MARK: - Stepper
-    let steps = PublishRelay<Step>()
+final class TileDetailViewModel: BaseViewModel, ObservableObject {
 
     // MARK: - Published
     @Published private(set) var item: HomeTileItem
@@ -21,5 +16,6 @@ final class TileDetailViewModel: ObservableObject, Stepper {
     // MARK: - Initialization
     init(item: HomeTileItem) {
         self.item = item
+        super.init()
     }
 }

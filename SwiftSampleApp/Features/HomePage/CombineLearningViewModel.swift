@@ -5,7 +5,6 @@
 
 import Foundation
 import Combine
-import RxFlow
 import RxCocoa
 import os
 
@@ -28,10 +27,7 @@ struct CombineLogEntry: Identifiable {
 
 // MARK: - ViewModel
 
-final class CombineLearningViewModel: ObservableObject, Stepper {
-
-    // MARK: - Stepper
-    let steps = PublishRelay<Step>()
+final class CombineLearningViewModel: BaseViewModel, ObservableObject {
 
     // MARK: - Published
     @Published private(set) var logMessages: [CombineLogEntry] = []
@@ -63,7 +59,8 @@ final class CombineLearningViewModel: ObservableObject, Stepper {
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization
-    init() {
+    override init() {
+        super.init()
         setupBindings()
     }
 

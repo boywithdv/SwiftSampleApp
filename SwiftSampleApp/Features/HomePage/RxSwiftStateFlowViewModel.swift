@@ -6,7 +6,6 @@
 import Foundation
 import RxSwift
 import RxCocoa
-import RxFlow
 import Combine
 
 // MARK: - Models
@@ -19,10 +18,7 @@ struct FlowEvent: Identifiable {
 
 // MARK: - ViewModel
 
-final class RxSwiftStateFlowViewModel: ObservableObject, Stepper {
-
-    // MARK: - Stepper
-    let steps = PublishRelay<Step>()
+final class RxSwiftStateFlowViewModel: BaseViewModel, ObservableObject {
 
     // MARK: - BehaviorRelay
     // BehaviorRelay: 常に最新値を保持。新しいSubscriberも即座に最新値を受け取る。
@@ -55,7 +51,8 @@ final class RxSwiftStateFlowViewModel: ObservableObject, Stepper {
     private var acceptCount = 0
 
     // MARK: - Init
-    init() {
+    override init() {
+        super.init()
         setupBindings()
         addEvent("✅ BehaviorRelay<Int>(value: 0) 生成")
         addEvent("🔗 Subscriber-1 購読開始")
