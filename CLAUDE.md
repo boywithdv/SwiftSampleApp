@@ -1,87 +1,111 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# CLAUDE.md — SwiftSampleApp (LocaSocial)
 
 ## プロジェクト概要
 
-美容サロン向けサンプルiOSアプリ。UIKitをコードベース（Storyboard不使用）で構築し、RxFlowで画面遷移を管理する。
+位置情報を使ったSNS iOS アプリ「LocaSocial」。Flutter版 `location_social_media` と同じFirebaseプロジェクト (`locationbasedinformationshare`) を共有。
+UIKit + SwiftUI ハイブリッド、RxFlow/RxSwift アーキテクチャ。
 
 ## ビルド・実行コマンド
 
 ```bash
-# Xcodeでプロジェクトを開く
 open SwiftSampleApp.xcodeproj
-
-# コマンドラインからビルド
 xcodebuild -scheme SwiftSampleApp -destination 'platform=iOS Simulator,name=iPhone 16'
-
-# テスト実行
-xcodebuild test -scheme SwiftSampleApp -destination 'platform=iOS Simulator,name=iPhone 16'
 ```
 
-## 依存パッケージ（Swift Package Manager）
+## 依存パッケージ（Xcode SPM で管理）
 
-- **RxFlow** 2.13.2 — 画面遷移のCoordinator管理
-- **RxSwift** 6.10.1 — リアクティブプログラミング（RxCocoa含む）
+- **RxFlow** 2.13.2
+- **RxSwift** 6.10.1 (RxCocoa含む)
+- **FirebaseCore / FirebaseAuth / FirebaseFirestore** (firebase-ios-sdk)
+- **FirebaseAnalytics / FirebaseRemoteConfig / FirebaseCrashlytics**
 
-パッケージはXcodeのSPMで管理。CocoaPodsではない。
+## Firebase セットアップ（手動ステップ）
+
+1. Xcode > File > Add Package Dependencies: `https://github.com/firebase/firebase-ios-sdk`
+2. Firebase Console (`locationbasedinformationshare`) から iOS バンドル ID で `GoogleService-Info.plist` を発行
+3. `SwiftSampleApp/` ターゲットに追加
+
+## Info.plist に必要な追加キー
+
+- `NSLocationWhenInUseUsageDescription` — マップ機能に必要
 
 ## アーキテクチャ
-
-### RxFlow による画面遷移パターン
-
-アプリ全体の遷移は **Flow + Step + Stepper** の3要素で構成される。
-
-- **`AppStep`** (`Flows/AppStep.swift`): 全画面遷移のステップを定義する単一のenum
-- **Flow**: 各画面フローの遷移ロジックを定義。`navigate(to:)` で `AppStep` を受け取り `FlowContributors` を返す
-- **Stepper**: ViewControllerが `Stepper` プロトコルに準拠し、`steps: PublishRelay<Step>` 経由で遷移を発火
 
 ### 遷移フロー
 
 ```
-SceneDelegate → AppFlow → SplashFlow → (splashComplete) → TabFlow
-                                                             ├── HomeFlow
-                                                             ├── BrowsingFlow
-                                                             ├── ReservationFlow
-                                                             ├── FavoriteFlow
-                                                             └── MyPageFlow
+SceneDelegate → AppFlow → SplashFlow → (authRequired) → AuthFlow → LoginVC/RegisterVC
+                                      → (tabBarIsRequired) → TabFlow
+                                                              ├── TimelineFlow (Tab 0)
+                                                              ├── SwiperFlow   (Tab 1)
+                                                              ├── MapFlow      (Tab 2)
+                                                              ├── SearchFlow   (Tab 3)
+                                                              └── ProfileFlow  (Tab 4)
+                                                                   └── ChatFlow (sub-flow)
 ```
 
-- `SceneDelegate` が `FlowCoordinator` を初期化し `AppFlow` を起動
-- `AppFlow` のrootは `UIWindow`（NavigationControllerではない）
-- `SplashFlow` 完了時に `.end(forwardToParentFlowWithStep:)` で親フローへステップを返す
-- `TabFlow` が `UITabBarController` を生成し、5つの子Flowを `.multiple` で登録
-
-### 新しい画面を追加する手順
-
-1. `AppStep` に新しいcaseを追加
-2. `Features/` 配下に ViewController を作成（UIKit コードベース、`Stepper` 準拠）
-3. `Flows/` 配下に対応する Flow を作成
-4. 親 Flow の `navigate(to:)` に遷移処理を追加
-
-## ディレクトリ構成
+### レイヤー構成
 
 ```
-SwiftSampleApp/
-├── Flows/          # RxFlow の Flow・Step 定義
-├── Features/       # 画面ごとの ViewController
-│   ├── Splash/
-│   ├── RootTabBar/Home/
-│   ├── BrowsingHistory/
-│   ├── Reservation/
-│   ├── Favorite/
-│   └── MyPage/
-├── Components/     # 再利用可能なUIコンポーネント（CardView等）
-├── Services/       # サービス層（未実装）
-├── Data/           # データ層（未実装）
-├── Protocols/      # プロトコル定義（未実装）
-├── Common/         # 共通ユーティリティ（未実装）
-└── Configs/        # 設定（未実装）
+DesignSystem/    — AppTheme, AppTabBarAppearance, UIColor+Hex
+Models/          — UserModel, UserPost, Message, Comment (Codable)
+Services/        — AuthService, FirestoreService, UserRepository, PostRepository,
+                   MessageRepository, CommentRepository, RemoteConfigService, LocationService
+Components/      — AvatarImageView, SNSCardView, PrimaryButton
+Flows/           — AppFlow, AuthFlow, TabFlow, TimelineFlow, SwiperFlow, MapFlow,
+                   SearchFlow, ProfileFlow, ChatFlow, SplashFlow
+Features/
+  Auth/          — Login/Register VC + VM
+  Timeline/      — Timeline + PostCell + CreatePost
+  Swiper/        — SwiftUI card swiper
+  Map/           — MKMapView + UserAnnotation
+  Search/        — UISearchController + UserSearchCell
+  Profile/       — Profile + EditProfile
+  PostDetail/    — SwiftUI post + comments
+  UserProfile/   — Other user view
+  FollowList/    — Followers/Following list
+  Chat/          — AllChats + ChatThread (SwiftUI)
+  Splash/        — Splash + auth routing
 ```
+
+### デザインシステム
+
+| Token | Light | Dark |
+|---|---|---|
+| Primary | `#01896C` | `#37B6E9` |
+| Secondary | `#F45479` | `#8BF8C4` |
+| Background | `#F2F2F7` | `#192734` |
+| Surface | `#FFFFFF` | `#22303C` |
+
+### SwiftUI HostingVC パターン（Swiper / PostDetail / Chat）
+
+`BaseViewModel + ObservableObject` 双方に準拠。UIKit Stepper は `SwiperHostingViewController` 等が担い、SwiftUI側は `@ObservedObject` で viewModel を参照。
+
+## Xcode に手動追加が必要なファイル
+
+新規ファイルは以下の順序でターゲット追加すること（`.pbxproj` は直接編集禁止）:
+
+1. DesignSystem/
+2. Models/
+3. Services/
+4. Components/
+5. Flows/（AuthFlow, ChatFlow, TimelineFlow, SwiperFlow, MapFlow, SearchFlow, ProfileFlow）
+6. Features/ 各フォルダ
+
+## 不要になったファイル（削除推奨）
+
+以下のファイルは SNS 化で置き換わったが、ファイルシステム上に残存している:
+
+- `Flows/HomeFlow.swift`, `BrowsingFlow.swift`, `ReservationFlow.swift`, `FavoriteFlow.swift`, `MyPageFlow.swift`
+- `Features/HomePage/` 配下（ラーニング画面群）
+- `Features/BrowsingHistory/`, `Features/Reservation/`, `Features/Favorite/`, `Features/MyPage/`
+- `Features/RootTabBarViewController.swift`, `Features/RootViewController.swift`
+
+Xcode の Navigator からターゲット外しただけでも OK（ビルドエラーにならない）。
 
 ## コーディング規約
 
-- UIはすべてコードベースで構築。`translatesAutoresizingMaskIntoConstraints = false` + `NSLayoutConstraint.activate` パターンを使用
-- ViewControllerは `// MARK: -` セクション（Properties, UI Components, Lifecycle, UI Setup, Bindings）で整理
-- メモリ管理: Flow内のクロージャでは `[weak self]` を使用。`DisposeBag` で RxSwift のサブスクリプションを管理
-- UIコンポーネントのプレビューには `#if DEBUG` + SwiftUI `UIViewRepresentable` ラッパーを使用
+- UIはすべてコードベース（Storyboard不使用）
+- ViewControllerは `// MARK: -` セクションで整理
+- `[weak self]` + `DisposeBag` で RxSwift メモリ管理
+- SwiftUI HostingVC パターン: `BaseViewModel` + `ObservableObject` 双方に準拠

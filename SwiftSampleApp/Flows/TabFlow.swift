@@ -2,26 +2,25 @@
 //  TabFlow.swift
 //  SwiftSampleApp
 //
-//  Created by tsukuda on 2026/02/22.
-//
 
 import UIKit
 import RxFlow
 import RxSwift
 import RxCocoa
 
-class TabFlow: Flow {
+final class TabFlow: Flow {
+
     var root: Presentable {
         return self.rootViewController
     }
-    
+
     private let rootViewController = UITabBarController()
-    
+
     init() {}
-    
+
     func navigate(to step: Step) -> FlowContributors {
         guard let step = step as? AppStep else { return .none }
-        
+
         switch step {
         case .tabBarIsRequired:
             return navigateToTabBar()
@@ -29,16 +28,16 @@ class TabFlow: Flow {
             return .none
         }
     }
-    
+
     private func navigateToTabBar() -> FlowContributors {
         let tabInfos: [(flow: Flow, step: AppStep, title: String, image: String, selectedImage: String)] = [
-            (HomeFlow(), .home, "ホーム", "house", "house.fill"),
-            (BrowsingFlow(), .browsing, "閲覧履歴", "clock", "clock.fill"),
-            (ReservationFlow(), .reservation, "予約", "calendar", "calendar.circle.fill"),
-            (FavoriteFlow(), .favorite, "お気に入り", "heart", "heart.fill"),
-            (MyPageFlow(), .myPage, "マイページ", "person", "person.fill")
+            (TimelineFlow(),  .timeline,    "ホーム",        "house",              "house.fill"),
+            (SwiperFlow(),    .swiper,       "スワイプ",      "person.2",           "person.2.fill"),
+            (MapFlow(),       .locationMap,  "マップ",        "map",                "map.fill"),
+            (SearchFlow(),    .search,       "検索",          "magnifyingglass",    "magnifyingglass"),
+            (ProfileFlow(),   .profile,      "プロフィール",  "person.crop.circle", "person.crop.circle.fill")
         ]
-        
+
         let flows = tabInfos.map { $0.flow }
         Flows.use(flows, when: .created) { [unowned self] roots in
             let viewControllers = zip(roots, tabInfos).compactMap { root, info -> UIViewController? in
@@ -52,7 +51,7 @@ class TabFlow: Flow {
             }
             self.rootViewController.setViewControllers(viewControllers, animated: false)
         }
-        
+
         let contributors = tabInfos.map { info in
             FlowContributor.contribute(
                 withNextPresentable: info.flow,
