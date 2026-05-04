@@ -45,8 +45,6 @@ final class SplashFlow: Flow {
 private final class SplashStepper: RxFlow.Stepper {
     let steps = PublishRelay<Step>()
 
-    var initialStep: Step { AppStep.splash }
-
     func readyToEmitSteps() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
             let isLoggedIn = AuthService.shared.isLoggedIn
