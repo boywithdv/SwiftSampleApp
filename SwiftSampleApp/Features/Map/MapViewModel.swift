@@ -9,13 +9,17 @@ import RxSwift
 import RxCocoa
 import RxFlow
 
-final class MapViewModel: BaseViewModel {
+final class MapViewModel: BaseViewModel, ObservableObject {
 
-    // MARK: - Outputs
+    // MARK: - @Published
 
-    let nearbyUsers    = BehaviorRelay<[UserModel]>(value: [])
+    @Published var displayNearbyUsers: [UserModel] = []
+
+    // MARK: - RxSwift Relays
+
+    let nearbyUsers     = BehaviorRelay<[UserModel]>(value: [])
     let currentLocation = BehaviorRelay<CLLocation?>(value: nil)
-    let errorMessage   = PublishRelay<String>()
+    let errorMessage    = PublishRelay<String>()
 
     // MARK: - Private
 
@@ -31,10 +35,13 @@ final class MapViewModel: BaseViewModel {
         self.authService     = authService
         self.locationService = locationService
         super.init()
+        bindRelaysToPublished()
         startLocationUpdates()
     }
 
     // MARK: - Public
+
+    func selectUser(uid: String) { steps.accept(AppStep.userProfile(uid)) }
 
     func fetchNearbyUsers(from location: CLLocation) {
         userRepository.fetchAllUsers()
@@ -60,6 +67,13 @@ final class MapViewModel: BaseViewModel {
     }
 
     // MARK: - Private
+
+    private func bindRelaysToPublished() {
+        nearbyUsers
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] in self?.displayNearbyUsers = $0 })
+            .disposed(by: disposeBag)
+    }
 
     private func startLocationUpdates() {
         locationService.requestPermission()

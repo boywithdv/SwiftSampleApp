@@ -30,20 +30,19 @@ struct MapViewRepresentable: UIViewRepresentable {
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
-        let existing = Set(mapView.annotations.compactMap { $0 as? UserAnnotation }.map(\.uid))
-        let updated  = Set(viewModel.nearbyUsers.map(\.uid))
+        let existing = Set(mapView.annotations.compactMap { $0 as? UserAnnotation }.map { $0.user.uid })
+        let updated  = Set(viewModel.displayNearbyUsers.map(\.uid))
 
         // Remove stale annotations
         let toRemove = mapView.annotations.compactMap { $0 as? UserAnnotation }
-            .filter { !updated.contains($0.uid) }
+            .filter { !updated.contains($0.user.uid) }
         mapView.removeAnnotations(toRemove)
 
         // Add new annotations
-        for user in viewModel.nearbyUsers where !existing.contains(user.uid) {
+        for user in viewModel.displayNearbyUsers where !existing.contains(user.uid) {
             guard let lat = user.latitude, let lon = user.longitude else { continue }
-            let annotation = UserAnnotation(user: user)
-            annotation.coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-            annotation.title = user.displayName
+            let coord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+            let annotation = UserAnnotation(user: user, coordinate: coord)
             mapView.addAnnotation(annotation)
         }
     }
@@ -57,7 +56,7 @@ struct MapViewRepresentable: UIViewRepresentable {
 
         func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
             guard let userAnnotation = annotation as? UserAnnotation else { return }
-            viewModel.selectUser(uid: userAnnotation.uid)
+            viewModel.selectUser(uid: userAnnotation.user.uid)
             mapView.deselectAnnotation(annotation, animated: true)
         }
 
