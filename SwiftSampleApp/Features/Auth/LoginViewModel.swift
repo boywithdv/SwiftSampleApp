@@ -4,28 +4,31 @@
 //
 
 import Foundation
+import Combine
 import RxSwift
 import RxCocoa
 import RxFlow
 
-final class LoginViewModel: BaseViewModel {
+final class LoginViewModel: BaseViewModel, ObservableObject {
 
-    // MARK: - Inputs
+    // MARK: - @Published
 
-    let emailRelay    = BehaviorRelay<String>(value: "")
-    let passwordRelay = BehaviorRelay<String>(value: "")
-    let loginTrigger  = PublishRelay<Void>()
+    @Published var email: String = ""
+    @Published var password: String = ""
+    @Published var isSigningIn: Bool = false
+    @Published var errorText: String? = nil
+
+    // MARK: - RxSwift Relays
+
+    let emailRelay      = BehaviorRelay<String>(value: "")
+    let passwordRelay   = BehaviorRelay<String>(value: "")
+    let loginTrigger    = PublishRelay<Void>()
     let registerTrigger = PublishRelay<Void>()
-
-    // MARK: - Outputs
-
-    let errorMessage = PublishRelay<String>()
+    let errorMessage    = PublishRelay<String>()
 
     var isFormValid: Observable<Bool> {
         Observable.combineLatest(emailRelay, passwordRelay)
-            .map { email, password in
-                !email.trimmingCharacters(in: .whitespaces).isEmpty && password.count >= 6
-            }
+            .map { e, p in !e.trimmingCharacters(in: .whitespaces).isEmpty && p.count >= 6 }
     }
 
     // MARK: - Private
@@ -36,18 +39,42 @@ final class LoginViewModel: BaseViewModel {
 
     init(authService: AuthServiceProtocol = AuthService.shared,
          userRepository: UserRepositoryProtocol = UserRepository.shared) {
-        self.authService   = authService
+        self.authService    = authService
         self.userRepository = userRepository
         super.init()
+        bindPublishedToRelays()
         bindInputs()
     }
 
-    // MARK: - Bindings
+    // MARK: - Public (SwiftUI actions)
+
+    func signIn() {
+        loginTrigger.accept(())
+    }
+
+    func goToRegister() {
+        steps.accept(AppStep.showRegister)
+    }
+
+    // MARK: - Private
+
+    private func bindPublishedToRelays() {
+        $email
+            .sink { [weak self] in self?.emailRelay.accept($0) }
+            .store(in: &cancellables)
+        $password
+            .sink { [weak self] in self?.passwordRelay.accept($0) }
+            .store(in: &cancellables)
+    }
+
+    private var cancellables = Set<AnyCancellable>()
 
     private func bindInputs() {
         loginTrigger
             .withLatestFrom(Observable.combineLatest(emailRelay, passwordRelay))
-            .do(onNext: { [weak self] _ in self?.isLoadingRelay.accept(true) })
+            .do(onNext: { [weak self] _ in
+                DispatchQueue.main.async { self?.isSigningIn = true }
+            })
             .flatMapLatest { [weak self] email, password -> Observable<Event<Void>> in
                 guard let self else { return .empty() }
                 return self.authService.signIn(email: email, password: password)
@@ -56,12 +83,13 @@ final class LoginViewModel: BaseViewModel {
                     .materialize()
             }
             .observe(on: MainScheduler.instance)
-            .do(onNext: { [weak self] _ in self?.isLoadingRelay.accept(false) })
             .subscribe(onNext: { [weak self] event in
+                self?.isSigningIn = false
                 switch event {
                 case .next:
                     self?.steps.accept(AppStep.loginComplete)
                 case .error(let error):
+                    self?.errorText = error.localizedDescription
                     self?.errorMessage.accept(error.localizedDescription)
                 default:
                     break
@@ -70,9 +98,7 @@ final class LoginViewModel: BaseViewModel {
             .disposed(by: disposeBag)
 
         registerTrigger
-            .subscribe(onNext: { [weak self] in
-                self?.steps.accept(AppStep.showRegister)
-            })
+            .subscribe(onNext: { [weak self] in self?.steps.accept(AppStep.showRegister) })
             .disposed(by: disposeBag)
     }
 }

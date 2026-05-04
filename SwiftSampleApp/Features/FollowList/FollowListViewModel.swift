@@ -4,36 +4,66 @@
 //
 
 import Foundation
+import Combine
 import RxSwift
 import RxCocoa
 import RxFlow
 
-final class FollowListViewModel: BaseViewModel {
+enum FollowListMode {
+    case followers
+    case following
 
-    // MARK: - Outputs
+    var title: String {
+        switch self {
+        case .followers: return "フォロワー"
+        case .following: return "フォロー中"
+        }
+    }
+}
+
+final class FollowListViewModel: BaseViewModel, ObservableObject {
+
+    // MARK: - @Published
+
+    @Published var displayUsers: [UserModel] = []
+
+    // MARK: - RxSwift Relays
 
     let users        = BehaviorRelay<[UserModel]>(value: [])
     let errorMessage = PublishRelay<String>()
 
+    // MARK: - Public
+
+    let mode: FollowListMode
+
     // MARK: - Private
 
     private let uid: String
-    private let mode: FollowListViewController.Mode
     private let userRepository: UserRepositoryProtocol
     private let disposeBag = DisposeBag()
 
     init(uid: String,
-         mode: FollowListViewController.Mode,
+         mode: FollowListMode,
          userRepository: UserRepositoryProtocol = UserRepository.shared) {
         self.uid            = uid
         self.mode           = mode
         self.userRepository = userRepository
         super.init()
+        bindRelaysToPublished()
         loadUsers()
     }
 
-    func selectUser(uid: String) {
-        steps.accept(AppStep.userProfile(uid))
+    // MARK: - Public
+
+    func selectUser(uid: String) { steps.accept(AppStep.userProfile(uid)) }
+
+    // MARK: - Private
+
+    private func bindRelaysToPublished() {
+        users
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] in self?.displayUsers = $0 })
+            .disposed(by: disposeBag)
     }
 
     private func loadUsers() {
@@ -44,11 +74,8 @@ final class FollowListViewModel: BaseViewModel {
         fetch
             .asObservable()
             .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] users in
-                self?.users.accept(users)
-            }, onError: { [weak self] error in
-                self?.errorMessage.accept(error.localizedDescription)
-            })
+            .subscribe(onNext: { [weak self] in self?.users.accept($0) },
+                       onError:  { [weak self] in self?.errorMessage.accept($0.localizedDescription) })
             .disposed(by: disposeBag)
     }
 }

@@ -4,22 +4,25 @@
 //
 
 import Foundation
+import Combine
 import RxSwift
 import RxCocoa
 import RxFlow
 
-final class TimelineViewModel: BaseViewModel {
+final class TimelineViewModel: BaseViewModel, ObservableObject {
 
-    // MARK: - Outputs
+    // MARK: - @Published (SwiftUI binding)
 
-    let posts = BehaviorRelay<[UserPost]>(value: [])
+    @Published var displayPosts: [UserPost] = []
+
+    // MARK: - RxSwift Relays
+
+    let posts        = BehaviorRelay<[UserPost]>(value: [])
     let errorMessage = PublishRelay<String>()
+    let likeTrigger  = PublishRelay<String>()
+    let createTrigger = PublishRelay<Void>()
 
-    // MARK: - Inputs
-
-    let likeTrigger    = PublishRelay<String>()   // postId
-    let createTrigger  = PublishRelay<Void>()
-    let refreshTrigger = PublishRelay<Void>()
+    var currentUserId: String? { authService.currentUserId }
 
     // MARK: - Private
 
@@ -27,18 +30,33 @@ final class TimelineViewModel: BaseViewModel {
     private let authService: AuthServiceProtocol
     private let disposeBag = DisposeBag()
 
-    var currentUserId: String? { authService.currentUserId }
-
     init(postRepository: PostRepositoryProtocol = PostRepository.shared,
          authService: AuthServiceProtocol = AuthService.shared) {
         self.postRepository = postRepository
         self.authService    = authService
         super.init()
+        bindRelaysToPublished()
         bindInputs()
         startListening()
     }
 
+    // MARK: - Public actions (SwiftUI callbacks)
+
+    func tapPost(_ post: UserPost) { steps.accept(AppStep.postDetail(post)) }
+    func tapUser(uid: String)     { steps.accept(AppStep.userProfile(uid)) }
+    func tapChat()                { steps.accept(AppStep.allChats) }
+    func tapCreate()              { steps.accept(AppStep.createPost) }
+
+    func toggleLike(postId: String) { likeTrigger.accept(postId) }
+
     // MARK: - Private
+
+    private func bindRelaysToPublished() {
+        posts
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] in self?.displayPosts = $0 })
+            .disposed(by: disposeBag)
+    }
 
     private func startListening() {
         postRepository.fetchTimeline()
@@ -49,9 +67,7 @@ final class TimelineViewModel: BaseViewModel {
 
     private func bindInputs() {
         likeTrigger
-            .withLatestFrom(posts) { postId, posts in
-                posts.first(where: { $0.postId == postId })
-            }
+            .withLatestFrom(posts) { postId, posts in posts.first { $0.postId == postId } }
             .compactMap { $0 }
             .subscribe(onNext: { [weak self] post in
                 guard let self, let uid = self.currentUserId else { return }
@@ -66,9 +82,7 @@ final class TimelineViewModel: BaseViewModel {
             .disposed(by: disposeBag)
 
         createTrigger
-            .subscribe(onNext: { [weak self] in
-                self?.steps.accept(AppStep.createPost)
-            })
+            .subscribe(onNext: { [weak self] in self?.steps.accept(AppStep.createPost) })
             .disposed(by: disposeBag)
     }
 }

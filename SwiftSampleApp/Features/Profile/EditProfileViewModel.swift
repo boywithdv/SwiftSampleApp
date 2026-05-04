@@ -4,22 +4,27 @@
 //
 
 import Foundation
+import Combine
 import RxSwift
 import RxCocoa
 import RxFlow
 
-final class EditProfileViewModel: BaseViewModel {
+final class EditProfileViewModel: BaseViewModel, ObservableObject {
 
-    // MARK: - Inputs
+    // MARK: - @Published
+
+    @Published var displayName: String = ""
+    @Published var isSaving: Bool = false
+    @Published var errorText: String? = nil
+    @Published var didSave: Bool = false
+
+    // MARK: - RxSwift Relays
 
     let displayNameRelay = BehaviorRelay<String>(value: "")
     let saveTrigger      = PublishRelay<Void>()
     let cancelTrigger    = PublishRelay<Void>()
-
-    // MARK: - Outputs
-
-    let saveSuccess  = PublishRelay<Void>()
-    let errorMessage = PublishRelay<String>()
+    let saveSuccess      = PublishRelay<Void>()
+    let errorMessage     = PublishRelay<String>()
 
     var isFormValid: Observable<Bool> {
         displayNameRelay.map { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
@@ -30,24 +35,37 @@ final class EditProfileViewModel: BaseViewModel {
     private let authService: AuthServiceProtocol
     private let userRepository: UserRepositoryProtocol
     private let disposeBag = DisposeBag()
+    private var cancellables = Set<AnyCancellable>()
 
     init(authService: AuthServiceProtocol = AuthService.shared,
          userRepository: UserRepositoryProtocol = UserRepository.shared) {
         self.authService    = authService
         self.userRepository = userRepository
         super.init()
+        bindPublishedToRelays()
         loadCurrentProfile()
         bindInputs()
     }
 
+    // MARK: - Public
+
+    func save()   { saveTrigger.accept(()) }
+    func cancel() { cancelTrigger.accept(()) }
+
     // MARK: - Private
+
+    private func bindPublishedToRelays() {
+        $displayName.sink { [weak self] in self?.displayNameRelay.accept($0) }.store(in: &cancellables)
+    }
 
     private func loadCurrentProfile() {
         guard let uid = authService.currentUserId else { return }
         userRepository.fetchUser(uid: uid)
             .observe(on: MainScheduler.instance)
             .subscribe(onSuccess: { [weak self] user in
-                self?.displayNameRelay.accept(user?.displayName ?? "")
+                let name = user?.displayName ?? ""
+                self?.displayNameRelay.accept(name)
+                DispatchQueue.main.async { self?.displayName = name }
             })
             .disposed(by: disposeBag)
     }
@@ -55,7 +73,9 @@ final class EditProfileViewModel: BaseViewModel {
     private func bindInputs() {
         saveTrigger
             .withLatestFrom(displayNameRelay)
-            .do(onNext: { [weak self] _ in self?.isLoadingRelay.accept(true) })
+            .do(onNext: { [weak self] _ in
+                DispatchQueue.main.async { self?.isSaving = true }
+            })
             .flatMapLatest { [weak self] name -> Observable<Event<Void>> in
                 guard let self, let uid = self.authService.currentUserId else { return .empty() }
                 return self.userRepository.fetchUser(uid: uid)
@@ -68,12 +88,14 @@ final class EditProfileViewModel: BaseViewModel {
                     .materialize()
             }
             .observe(on: MainScheduler.instance)
-            .do(onNext: { [weak self] _ in self?.isLoadingRelay.accept(false) })
             .subscribe(onNext: { [weak self] event in
+                self?.isSaving = false
                 switch event {
                 case .next:
+                    self?.didSave = true
                     self?.saveSuccess.accept(())
                 case .error(let error):
+                    self?.errorText = error.localizedDescription
                     self?.errorMessage.accept(error.localizedDescription)
                 default:
                     break

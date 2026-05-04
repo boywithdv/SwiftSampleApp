@@ -1,0 +1,80 @@
+//
+//  MapContainerView.swift
+//  SwiftSampleApp
+//
+
+import SwiftUI
+import MapKit
+
+struct MapContainerView: View {
+    @StateObject var viewModel: MapViewModel
+
+    var body: some View {
+        MapViewRepresentable(viewModel: viewModel)
+            .ignoresSafeArea(edges: .top)
+            .background(Color.appBackground)
+    }
+}
+
+// MARK: - UIViewRepresentable
+
+struct MapViewRepresentable: UIViewRepresentable {
+    @ObservedObject var viewModel: MapViewModel
+
+    func makeUIView(context: Context) -> MKMapView {
+        let map = MKMapView()
+        map.delegate = context.coordinator
+        map.showsUserLocation = true
+        map.userTrackingMode = .follow
+        return map
+    }
+
+    func updateUIView(_ mapView: MKMapView, context: Context) {
+        let existing = Set(mapView.annotations.compactMap { $0 as? UserAnnotation }.map(\.uid))
+        let updated  = Set(viewModel.nearbyUsers.map(\.uid))
+
+        // Remove stale annotations
+        let toRemove = mapView.annotations.compactMap { $0 as? UserAnnotation }
+            .filter { !updated.contains($0.uid) }
+        mapView.removeAnnotations(toRemove)
+
+        // Add new annotations
+        for user in viewModel.nearbyUsers where !existing.contains(user.uid) {
+            guard let lat = user.latitude, let lon = user.longitude else { continue }
+            let annotation = UserAnnotation(user: user)
+            annotation.coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+            annotation.title = user.displayName
+            mapView.addAnnotation(annotation)
+        }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(viewModel: viewModel) }
+
+    final class Coordinator: NSObject, MKMapViewDelegate {
+        let viewModel: MapViewModel
+
+        init(viewModel: MapViewModel) { self.viewModel = viewModel }
+
+        func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
+            guard let userAnnotation = annotation as? UserAnnotation else { return }
+            viewModel.selectUser(uid: userAnnotation.uid)
+            mapView.deselectAnnotation(annotation, animated: true)
+        }
+
+        func mapView(_ mapView: MKMapView,
+                     viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+            guard annotation is UserAnnotation else { return nil }
+            let id = "UserPin"
+            let view = mapView.dequeueReusableAnnotationView(withIdentifier: id)
+                ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: id)
+            if let marker = view as? MKMarkerAnnotationView {
+                marker.glyphImage = UIImage(systemName: "person.fill")
+                marker.markerTintColor = UIColor(named: "AppPrimary")
+                    ?? UIColor(red: 0.004, green: 0.537, blue: 0.424, alpha: 1)
+                marker.canShowCallout = true
+            }
+            view.annotation = annotation
+            return view
+        }
+    }
+}

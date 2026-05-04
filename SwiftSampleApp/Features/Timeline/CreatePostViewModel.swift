@@ -4,22 +4,29 @@
 //
 
 import Foundation
+import Combine
 import RxSwift
 import RxCocoa
 import RxFlow
 
-final class CreatePostViewModel: BaseViewModel {
+final class CreatePostViewModel: BaseViewModel, ObservableObject {
 
-    // MARK: - Inputs
+    // MARK: - @Published
 
-    let messageRelay   = BehaviorRelay<String>(value: "")
-    let submitTrigger  = PublishRelay<Void>()
-    let cancelTrigger  = PublishRelay<Void>()
+    @Published var postText: String = "" {
+        didSet { messageRelay.accept(postText) }
+    }
+    @Published var didPost: Bool = false
 
-    // MARK: - Outputs
+    var remainingChars: Int { 280 - postText.count }
 
-    let errorMessage   = PublishRelay<String>()
-    let postSuccess    = PublishRelay<Void>()
+    // MARK: - RxSwift Relays
+
+    let messageRelay  = BehaviorRelay<String>(value: "")
+    let submitTrigger = PublishRelay<Void>()
+    let cancelTrigger = PublishRelay<Void>()
+    let errorMessage  = PublishRelay<String>()
+    let postSuccess   = PublishRelay<Void>()
 
     var isFormValid: Observable<Bool> {
         messageRelay.map { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
@@ -45,6 +52,7 @@ final class CreatePostViewModel: BaseViewModel {
     private func bindInputs() {
         submitTrigger
             .withLatestFrom(messageRelay)
+            .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
             .do(onNext: { [weak self] _ in self?.isLoadingRelay.accept(true) })
             .flatMapLatest { [weak self] message -> Observable<Event<Void>> in
                 guard let self, let uid = self.authService.currentUserId else { return .empty() }
@@ -62,6 +70,7 @@ final class CreatePostViewModel: BaseViewModel {
                 switch event {
                 case .next:
                     self?.postSuccess.accept(())
+                    self?.didPost = true
                 case .error(let error):
                     self?.errorMessage.accept(error.localizedDescription)
                 default:

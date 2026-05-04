@@ -4,13 +4,18 @@
 //
 
 import Foundation
+import Combine
 import RxSwift
 import RxCocoa
 import RxFlow
 
-final class AllChatsViewModel: BaseViewModel {
+final class AllChatsViewModel: BaseViewModel, ObservableObject {
 
-    // MARK: - Outputs
+    // MARK: - @Published
+
+    @Published var displayConversations: [(Message, UserModel?)] = []
+
+    // MARK: - RxSwift Relays
 
     let conversations = BehaviorRelay<[(Message, UserModel?)]>(value: [])
     let errorMessage  = PublishRelay<String>()
@@ -29,11 +34,23 @@ final class AllChatsViewModel: BaseViewModel {
         self.userRepository    = userRepository
         self.authService       = authService
         super.init()
+        bindRelaysToPublished()
         loadConversations()
     }
 
+    // MARK: - Public
+
     func selectConversation(user: UserModel) {
         steps.accept(AppStep.chatThread(user))
+    }
+
+    // MARK: - Private
+
+    private func bindRelaysToPublished() {
+        conversations
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] in self?.displayConversations = $0 })
+            .disposed(by: disposeBag)
     }
 
     private func loadConversations() {
@@ -42,10 +59,8 @@ final class AllChatsViewModel: BaseViewModel {
         messageRepository.fetchConversationPartners(userId: uid)
             .flatMap { [weak self] messages -> Observable<[(Message, UserModel?)]> in
                 guard let self else { return .just([]) }
-                // Group by receiver and get latest per conversation
                 var seen = Set<String>()
                 let unique = messages.filter { seen.insert($0.receiverId).inserted }
-
                 let fetches = unique.map { message in
                     self.userRepository.fetchUser(uid: message.receiverId)
                         .map { (message, $0) }

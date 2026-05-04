@@ -4,23 +4,28 @@
 //
 
 import Foundation
+import Combine
 import RxSwift
 import RxCocoa
 import RxFlow
 
-final class UserProfileViewModel: BaseViewModel {
+final class UserProfileViewModel: BaseViewModel, ObservableObject {
 
-    // MARK: - Outputs
+    // MARK: - @Published
+
+    @Published var displayTargetUser: UserModel? = nil
+    @Published var displayPosts: [UserPost] = []
+    @Published var displayIsFollowing: Bool = false
+
+    // MARK: - RxSwift Relays
 
     let targetUser   = BehaviorRelay<UserModel?>(value: nil)
     let posts        = BehaviorRelay<[UserPost]>(value: [])
     let isFollowing  = BehaviorRelay<Bool>(value: false)
     let errorMessage = PublishRelay<String>()
 
-    // MARK: - Inputs
-
-    let followTrigger  = PublishRelay<Void>()
-    let messageTrigger = PublishRelay<Void>()
+    let followTrigger    = PublishRelay<Void>()
+    let messageTrigger   = PublishRelay<Void>()
     let followersTrigger = PublishRelay<Void>()
     let followingTrigger = PublishRelay<Void>()
 
@@ -41,11 +46,37 @@ final class UserProfileViewModel: BaseViewModel {
         self.userRepository = userRepository
         self.postRepository = postRepository
         super.init()
+        bindRelaysToPublished()
         loadProfile()
         bindInputs()
     }
 
+    // MARK: - Public actions
+
+    func tapFollow()     { followTrigger.accept(()) }
+    func tapMessage()    { messageTrigger.accept(()) }
+    func tapFollowers()  { followersTrigger.accept(()) }
+    func tapFollowing()  { followingTrigger.accept(()) }
+    func tapPost(_ p: UserPost) { steps.accept(AppStep.postDetail(p)) }
+
     // MARK: - Private
+
+    private func bindRelaysToPublished() {
+        targetUser
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] in self?.displayTargetUser = $0 })
+            .disposed(by: disposeBag)
+
+        posts
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] in self?.displayPosts = $0 })
+            .disposed(by: disposeBag)
+
+        isFollowing
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] in self?.displayIsFollowing = $0 })
+            .disposed(by: disposeBag)
+    }
 
     private func loadProfile() {
         guard let currentUid = authService.currentUserId else { return }
@@ -63,23 +94,21 @@ final class UserProfileViewModel: BaseViewModel {
         postRepository.fetchPostsByUser(userId: targetUid)
             .asObservable()
             .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] posts in
-                self?.posts.accept(posts)
-            })
+            .subscribe(onNext: { [weak self] in self?.posts.accept($0) })
             .disposed(by: disposeBag)
     }
 
     private func bindInputs() {
         followTrigger
             .withLatestFrom(isFollowing)
-            .subscribe(onNext: { [weak self] isFollowing in
-                guard let self, let currentUid = self.authService.currentUserId else { return }
-                if isFollowing {
-                    self.userRepository.unfollow(targetUid: self.targetUid, currentUid: currentUid)
+            .subscribe(onNext: { [weak self] following in
+                guard let self, let uid = self.authService.currentUserId else { return }
+                if following {
+                    self.userRepository.unfollow(targetUid: self.targetUid, currentUid: uid)
                         .subscribe().disposed(by: self.disposeBag)
                     self.isFollowing.accept(false)
                 } else {
-                    self.userRepository.follow(targetUid: self.targetUid, currentUid: currentUid)
+                    self.userRepository.follow(targetUid: self.targetUid, currentUid: uid)
                         .subscribe().disposed(by: self.disposeBag)
                     self.isFollowing.accept(true)
                 }
@@ -87,11 +116,8 @@ final class UserProfileViewModel: BaseViewModel {
             .disposed(by: disposeBag)
 
         messageTrigger
-            .withLatestFrom(targetUser)
-            .compactMap { $0 }
-            .subscribe(onNext: { [weak self] user in
-                self?.steps.accept(AppStep.chatThread(user))
-            })
+            .withLatestFrom(targetUser).compactMap { $0 }
+            .subscribe(onNext: { [weak self] in self?.steps.accept(AppStep.chatThread($0)) })
             .disposed(by: disposeBag)
 
         followersTrigger
