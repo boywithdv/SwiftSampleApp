@@ -86,6 +86,8 @@ final class PostDetailViewModel: BaseViewModel, ObservableObject {
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] comments in
                 self?.comments = comments
+            }, onError: { [weak self] error in
+                self?.errorMessage.accept(error.localizedDescription)
             })
             .disposed(by: disposeBag)
     }

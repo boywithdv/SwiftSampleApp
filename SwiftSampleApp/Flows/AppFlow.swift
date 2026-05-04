@@ -22,12 +22,7 @@ final class AppFlow: Flow {
     }
 
     func navigate(to step: Step) -> FlowContributors {
-        guard let step = step as? AppStep else {
-            print("[AppFlow] Received non-AppStep: \(step)")
-            return .none
-        }
-
-        print("[AppFlow] navigate to: \(step)")
+        guard let step = step as? AppStep else { return .none }
         switch step {
         case .splash:
             return navigateToSplash()

@@ -62,6 +62,10 @@ final class TimelineViewModel: BaseViewModel, ObservableObject {
     private func startListening() {
         postRepository.fetchTimeline()
             .observe(on: MainScheduler.instance)
+            .catch { [weak self] error in
+                self?.errorMessage.accept(error.localizedDescription)
+                return Observable.empty()
+            }
             .bind(to: posts)
             .disposed(by: disposeBag)
     }

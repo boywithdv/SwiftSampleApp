@@ -44,10 +44,16 @@ final class SplashFlow: Flow {
 
 private final class SplashStepper: RxFlow.Stepper {
     let steps = PublishRelay<Step>()
+    private var hasEmitted = false
+
+    var initialStep: Step { AppStep.splash }
 
     func readyToEmitSteps() {
+        guard !hasEmitted else { return }
+        hasEmitted = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
             let isLoggedIn = AuthService.shared.isLoggedIn
+            print("[SplashStepper] isLoggedIn: \(isLoggedIn)")
             self?.steps.accept(isLoggedIn ? AppStep.tabBarIsRequired : AppStep.authRequired)
         }
     }
