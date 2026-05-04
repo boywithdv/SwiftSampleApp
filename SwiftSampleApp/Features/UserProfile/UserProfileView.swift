@@ -122,33 +122,3 @@ struct UserProfileView: View {
     }
 }
 
-// MARK: - StatView
-
-private struct StatView: View {
-    let label: String
-    let value: Int
-
-    var body: some View {
-        VStack(spacing: 4) {
-            Text("\(value)")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(Color.appTextPrimary)
-            Text(label)
-                .font(.system(size: 12))
-                .foregroundStyle(Color.appTextSecondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-    }
-}
-
-// MARK: - UserModel extension
-
-private extension UserModel {
-    var initials: String {
-        let parts = displayName.trimmingCharacters(in: .whitespaces).components(separatedBy: " ")
-        let first = parts.first?.prefix(1) ?? ""
-        let last  = parts.count > 1 ? parts.last?.prefix(1) ?? "" : ""
-        return (first + last).uppercased()
-    }
-}

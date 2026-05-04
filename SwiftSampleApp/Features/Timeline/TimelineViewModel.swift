@@ -19,8 +19,9 @@ final class TimelineViewModel: BaseViewModel, ObservableObject {
 
     let posts        = BehaviorRelay<[UserPost]>(value: [])
     let errorMessage = PublishRelay<String>()
-    let likeTrigger  = PublishRelay<String>()
+    let likeTrigger   = PublishRelay<String>()
     let createTrigger = PublishRelay<Void>()
+    let refreshTrigger = PublishRelay<Void>()
 
     var currentUserId: String? { authService.currentUserId }
 
@@ -83,6 +84,10 @@ final class TimelineViewModel: BaseViewModel, ObservableObject {
 
         createTrigger
             .subscribe(onNext: { [weak self] in self?.steps.accept(AppStep.createPost) })
+            .disposed(by: disposeBag)
+
+        refreshTrigger
+            .subscribe(onNext: { [weak self] _ in self?.startListening() })
             .disposed(by: disposeBag)
     }
 }

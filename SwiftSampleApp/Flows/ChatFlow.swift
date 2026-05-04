@@ -4,13 +4,12 @@
 //
 
 import UIKit
+import SwiftUI
 import RxFlow
 
 final class ChatFlow: Flow {
 
-    var root: Presentable {
-        return navigationController
-    }
+    var root: Presentable { navigationController }
 
     private let navigationController: UINavigationController
 
@@ -33,10 +32,11 @@ final class ChatFlow: Flow {
 
     private func navigateToAllChats() -> FlowContributors {
         let viewModel = AllChatsViewModel()
-        let viewController = AllChatsViewController(viewModel: viewModel)
-        navigationController.pushViewController(viewController, animated: true)
+        let vc = UIHostingController(rootView: AllChatsView(viewModel: viewModel))
+        vc.title = "メッセージ"
+        navigationController.pushViewController(vc, animated: true)
         return .one(flowContributor: .contribute(
-            withNextPresentable: viewController,
+            withNextPresentable: vc,
             withNextStepper: viewModel
         ))
     }

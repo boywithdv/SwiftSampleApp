@@ -4,13 +4,12 @@
 //
 
 import UIKit
+import SwiftUI
 import RxFlow
 
 final class SwiperFlow: Flow {
 
-    var root: Presentable {
-        return navigationController
-    }
+    var root: Presentable { navigationController }
 
     private let navigationController: UINavigationController = {
         let nav = UINavigationController()
@@ -33,20 +32,21 @@ final class SwiperFlow: Flow {
 
     private func navigateToSwiper() -> FlowContributors {
         let viewModel = SwiperViewModel()
-        let viewController = SwiperHostingViewController(viewModel: viewModel)
-        navigationController.setViewControllers([viewController], animated: false)
+        let vc = UIHostingController(rootView: SwiperView(viewModel: viewModel))
+        vc.title = "スワイプ"
+        navigationController.setViewControllers([vc], animated: false)
         return .one(flowContributor: .contribute(
-            withNextPresentable: viewController,
+            withNextPresentable: vc,
             withNextStepper: viewModel
         ))
     }
 
     private func navigateToUserProfile(uid: String) -> FlowContributors {
         let viewModel = UserProfileViewModel(targetUid: uid)
-        let viewController = UserProfileViewController(viewModel: viewModel)
-        navigationController.pushViewController(viewController, animated: true)
+        let vc = UIHostingController(rootView: UserProfileView(viewModel: viewModel))
+        navigationController.pushViewController(vc, animated: true)
         return .one(flowContributor: .contribute(
-            withNextPresentable: viewController,
+            withNextPresentable: vc,
             withNextStepper: viewModel
         ))
     }

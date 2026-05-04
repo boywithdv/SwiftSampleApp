@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import RxRelay
 
 struct CreatePostView: View {
     @StateObject var viewModel: CreatePostViewModel

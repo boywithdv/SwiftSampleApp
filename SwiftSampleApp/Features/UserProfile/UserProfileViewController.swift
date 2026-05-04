@@ -54,9 +54,9 @@ final class UserProfileViewController: UIViewController {
         return sv
     }()
 
-    private let followersStatView = StatView(title: "フォロワー")
-    private let followingStatView = StatView(title: "フォロー中")
-    private let postsStatView = StatView(title: "投稿")
+    private let followersStatView = UIKitStatView(title: "フォロワー")
+    private let followingStatView = UIKitStatView(title: "フォロー中")
+    private let postsStatView = UIKitStatView(title: "投稿")
 
     private let followButton: UIButton = {
         let button = UIButton(type: .system)

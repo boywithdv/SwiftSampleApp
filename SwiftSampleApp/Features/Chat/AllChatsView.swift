@@ -96,13 +96,4 @@ private extension Message {
     }
 }
 
-// MARK: - UserModel extension
 
-private extension UserModel {
-    var initials: String {
-        let parts = displayName.trimmingCharacters(in: .whitespaces).components(separatedBy: " ")
-        let first = parts.first?.prefix(1) ?? ""
-        let last  = parts.count > 1 ? parts.last?.prefix(1) ?? "" : ""
-        return (first + last).uppercased()
-    }
-}

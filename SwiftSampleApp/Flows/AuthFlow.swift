@@ -4,19 +4,18 @@
 //
 
 import UIKit
+import SwiftUI
 import RxFlow
-import RxSwift
 
 final class AuthFlow: Flow {
 
-    var root: Presentable {
-        return navigationController
-    }
+    var root: Presentable { navigationController }
 
     private let navigationController: UINavigationController = {
         let nav = UINavigationController()
         nav.navigationBar.tintColor = AppTheme.Color.primary
         nav.navigationBar.prefersLargeTitles = false
+        nav.navigationBar.isHidden = true
         return nav
     }()
 
@@ -39,20 +38,22 @@ final class AuthFlow: Flow {
 
     private func navigateToLogin() -> FlowContributors {
         let viewModel = LoginViewModel()
-        let viewController = LoginViewController(viewModel: viewModel)
-        navigationController.setViewControllers([viewController], animated: false)
+        let vc = UIHostingController(rootView: LoginView(viewModel: viewModel))
+        vc.view.backgroundColor = .clear
+        navigationController.setViewControllers([vc], animated: false)
         return .one(flowContributor: .contribute(
-            withNextPresentable: viewController,
+            withNextPresentable: vc,
             withNextStepper: viewModel
         ))
     }
 
     private func navigateToRegister() -> FlowContributors {
         let viewModel = RegisterViewModel()
-        let viewController = RegisterViewController(viewModel: viewModel)
-        navigationController.pushViewController(viewController, animated: true)
+        let vc = UIHostingController(rootView: RegisterView(viewModel: viewModel))
+        vc.view.backgroundColor = .clear
+        navigationController.pushViewController(vc, animated: true)
         return .one(flowContributor: .contribute(
-            withNextPresentable: viewController,
+            withNextPresentable: vc,
             withNextStepper: viewModel
         ))
     }

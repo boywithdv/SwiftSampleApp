@@ -4,20 +4,21 @@
 //
 
 import UIKit
+import SwiftUI
 import RxFlow
 import RxSwift
 import RxCocoa
 
 final class SplashFlow: Flow {
 
-    var root: Presentable {
-        return self.rootViewController
-    }
+    var root: Presentable { rootViewController }
 
-    private let rootViewController: SplashViewController
+    private let rootViewController: UIHostingController<SplashView>
+    private let stepper = SplashStepper()
 
     init() {
-        self.rootViewController = SplashViewController()
+        rootViewController = UIHostingController(rootView: SplashView())
+        rootViewController.view.backgroundColor = .clear
     }
 
     func navigate(to step: Step) -> FlowContributors {
@@ -27,7 +28,7 @@ final class SplashFlow: Flow {
         case .splash:
             return .one(flowContributor: .contribute(
                 withNextPresentable: rootViewController,
-                withNextStepper: rootViewController
+                withNextStepper: stepper
             ))
         case .authRequired:
             return .end(forwardToParentFlowWithStep: AppStep.authRequired)
@@ -35,6 +36,21 @@ final class SplashFlow: Flow {
             return .end(forwardToParentFlowWithStep: AppStep.tabBarIsRequired)
         default:
             return .none
+        }
+    }
+}
+
+// MARK: - SplashStepper
+
+private final class SplashStepper: RxFlow.Stepper {
+    let steps = PublishRelay<Step>()
+
+    var initialStep: Step { AppStep.splash }
+
+    func readyToEmitSteps() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            let isLoggedIn = AuthService.shared.isLoggedIn
+            self?.steps.accept(isLoggedIn ? AppStep.tabBarIsRequired : AppStep.authRequired)
         }
     }
 }

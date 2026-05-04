@@ -141,7 +141,7 @@ struct ProfileView: View {
 
 // MARK: - StatView
 
-private struct StatView: View {
+struct StatView: View {
     let label: String
     let value: Int
 

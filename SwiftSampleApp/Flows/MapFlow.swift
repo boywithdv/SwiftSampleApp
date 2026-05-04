@@ -4,13 +4,12 @@
 //
 
 import UIKit
+import SwiftUI
 import RxFlow
 
 final class MapFlow: Flow {
 
-    var root: Presentable {
-        return navigationController
-    }
+    var root: Presentable { navigationController }
 
     private let navigationController: UINavigationController = {
         let nav = UINavigationController()
@@ -33,20 +32,21 @@ final class MapFlow: Flow {
 
     private func navigateToMap() -> FlowContributors {
         let viewModel = MapViewModel()
-        let viewController = MapViewController(viewModel: viewModel)
-        navigationController.setViewControllers([viewController], animated: false)
+        let vc = UIHostingController(rootView: MapContainerView(viewModel: viewModel))
+        vc.title = "マップ"
+        navigationController.setViewControllers([vc], animated: false)
         return .one(flowContributor: .contribute(
-            withNextPresentable: viewController,
+            withNextPresentable: vc,
             withNextStepper: viewModel
         ))
     }
 
     private func navigateToUserProfile(uid: String) -> FlowContributors {
         let viewModel = UserProfileViewModel(targetUid: uid)
-        let viewController = UserProfileViewController(viewModel: viewModel)
-        navigationController.pushViewController(viewController, animated: true)
+        let vc = UIHostingController(rootView: UserProfileView(viewModel: viewModel))
+        navigationController.pushViewController(vc, animated: true)
         return .one(flowContributor: .contribute(
-            withNextPresentable: viewController,
+            withNextPresentable: vc,
             withNextStepper: viewModel
         ))
     }

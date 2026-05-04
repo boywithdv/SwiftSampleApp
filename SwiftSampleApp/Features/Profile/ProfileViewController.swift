@@ -54,9 +54,9 @@ final class ProfileViewController: UIViewController {
         return sv
     }()
 
-    private let postsStatView = StatView(title: "投稿")
-    private let followersStatView = StatView(title: "フォロワー")
-    private let followingStatView = StatView(title: "フォロー中")
+    private let postsStatView = UIKitStatView(title: "投稿")
+    private let followersStatView = UIKitStatView(title: "フォロワー")
+    private let followingStatView = UIKitStatView(title: "フォロー中")
 
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -221,7 +221,7 @@ final class ProfileViewController: UIViewController {
 
 // MARK: - Helper Views
 
-final class StatView: UIView {
+final class UIKitStatView: UIView {
     private let countLabel = UILabel()
     private let titleLabel = UILabel()
 
