@@ -50,10 +50,16 @@ private final class SplashStepper: RxFlow.Stepper {
     let steps = PublishRelay<Step>()
 
     func readyToEmitSteps() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-            self?.steps.accept(AuthService.shared.isLoggedIn
-                ? AppStep.tabBarIsRequired
-                : AppStep.authRequired)
+        let splashStart = Date()
+        // スプラッシュ表示中にRemoteConfigをフェッチ（Flutterと同じ初期化タイミング）
+        RemoteConfigService.shared.fetchAndActivate { [weak self] in
+            let elapsed = Date().timeIntervalSince(splashStart)
+            let remaining = max(0, 1.5 - elapsed) // 最低1.5秒スプラッシュを表示
+            DispatchQueue.main.asyncAfter(deadline: .now() + remaining) {
+                self?.steps.accept(AuthService.shared.isLoggedIn
+                    ? AppStep.tabBarIsRequired
+                    : AppStep.authRequired)
+            }
         }
     }
 }

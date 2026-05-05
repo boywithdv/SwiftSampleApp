@@ -30,8 +30,14 @@ final class TabFlow: Flow {
     }
 
     private func navigateToTabBar() -> FlowContributors {
-        let tabInfos: [(flow: Flow, step: AppStep, title: String, image: String, selectedImage: String)] = [
-            (TimelineFlow(),  .timeline,    "ホーム",        "house",              "house.fill"),
+        // time_line_view の値に応じて Home タブを表示/非表示（Flutter の NavigationConfig と同一ロジック）
+        let isTimelineEnabled = RemoteConfigService.shared.timelineViewEnabled
+
+        var tabInfos: [(flow: Flow, step: AppStep, title: String, image: String, selectedImage: String)] = []
+        if isTimelineEnabled {
+            tabInfos.append((TimelineFlow(), .timeline, "ホーム", "house", "house.fill"))
+        }
+        tabInfos += [
             (SwiperFlow(),    .swiper,       "スワイプ",      "person.2",           "person.2.fill"),
             (MapFlow(),       .locationMap,  "マップ",        "map",                "map.fill"),
             (SearchFlow(),    .search,       "検索",          "magnifyingglass",    "magnifyingglass"),
