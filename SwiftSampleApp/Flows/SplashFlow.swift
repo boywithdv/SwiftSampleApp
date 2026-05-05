@@ -42,19 +42,18 @@ final class SplashFlow: Flow {
 
 // MARK: - SplashStepper
 
+// NOTE: initialStep を定義してはいけない。
+// AppFlow の OneStepper(withSingleStep: .splash) が最初の .splash を発行する。
+// ここで initialStep = .splash を定義すると RxFlow が .splash を再発行し、
+// ステッパーが多重登録されて navigate(to: .splash) がループする。
 private final class SplashStepper: RxFlow.Stepper {
     let steps = PublishRelay<Step>()
-    private var hasEmitted = false
-
-    var initialStep: Step { AppStep.splash }
 
     func readyToEmitSteps() {
-        guard !hasEmitted else { return }
-        hasEmitted = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-            let isLoggedIn = AuthService.shared.isLoggedIn
-            print("[SplashStepper] isLoggedIn: \(isLoggedIn)")
-            self?.steps.accept(isLoggedIn ? AppStep.tabBarIsRequired : AppStep.authRequired)
+            self?.steps.accept(AuthService.shared.isLoggedIn
+                ? AppStep.tabBarIsRequired
+                : AppStep.authRequired)
         }
     }
 }

@@ -20,6 +20,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let window = UIWindow(windowScene: windowScene)
         self.window = window
+        // ウィンドウにスプラッシュ相当の背景色を先に設定して白いフラッシュを防止する
+        window.backgroundColor = AppTheme.Color.primary
         window.makeKeyAndVisible()
 
         let appFlow = AppFlow(window: window)
