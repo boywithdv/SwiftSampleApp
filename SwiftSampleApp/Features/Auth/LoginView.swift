@@ -14,16 +14,18 @@ struct LoginView: View {
     @State private var showError = false
 
     var body: some View {
-        ZStack {
-            loginBackground
-            ScrollView {
-                VStack(spacing: 0) {
-                    Spacer().frame(height: UIScreen.main.bounds.height * 0.08)
-                    logoArea
-                    Spacer().frame(height: UIScreen.main.bounds.height * 0.04)
-                    formArea
+        GeometryReader { geometry in
+            ZStack {
+                loginBackground
+                ScrollView {
+                    VStack(spacing: 0) {
+                        Spacer().frame(height: geometry.size.height * 0.08)
+                        logoArea
+                        Spacer().frame(height: geometry.size.height * 0.04)
+                        formArea
+                    }
+                    .padding(.horizontal, 28)
                 }
-                .padding(.horizontal, 28)
             }
         }
         .ignoresSafeArea()

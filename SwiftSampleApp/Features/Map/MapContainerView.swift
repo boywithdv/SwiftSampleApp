@@ -68,8 +68,7 @@ struct MapViewRepresentable: UIViewRepresentable {
                 ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: id)
             if let marker = view as? MKMarkerAnnotationView {
                 marker.glyphImage = UIImage(systemName: "person.fill")
-                marker.markerTintColor = UIColor(named: "AppPrimary")
-                    ?? UIColor(red: 0.004, green: 0.537, blue: 0.424, alpha: 1)
+                marker.markerTintColor = AppTheme.Color.primary
                 marker.canShowCallout = true
             }
             view.annotation = annotation

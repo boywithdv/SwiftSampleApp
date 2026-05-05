@@ -24,6 +24,8 @@ final class TabFlow: Flow {
         switch step {
         case .tabBarIsRequired:
             return navigateToTabBar()
+        case .logoutComplete:
+            return .end(forwardToParentFlowWithStep: AppStep.logoutComplete)
         default:
             return .none
         }

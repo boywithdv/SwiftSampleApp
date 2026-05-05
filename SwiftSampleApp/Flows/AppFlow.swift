@@ -51,8 +51,9 @@ final class AppFlow: Flow {
     private func navigateToAuth() -> FlowContributors {
         let authFlow = AuthFlow()
         Flows.use(authFlow, when: .created) { [weak self] root in
-            UIView.transition(with: self!.window, duration: 0.3, options: .transitionCrossDissolve) {
-                self?.window.rootViewController = root
+            guard let self else { return }
+            UIView.transition(with: self.window, duration: 0.3, options: .transitionCrossDissolve) {
+                self.window.rootViewController = root
             }
         }
         return .one(flowContributor: .contribute(
@@ -64,8 +65,9 @@ final class AppFlow: Flow {
     private func navigateToTabBar() -> FlowContributors {
         let tabFlow = TabFlow()
         Flows.use(tabFlow, when: .created) { [weak self] root in
-            UIView.transition(with: self!.window, duration: 0.3, options: .transitionCrossDissolve) {
-                self?.window.rootViewController = root
+            guard let self else { return }
+            UIView.transition(with: self.window, duration: 0.3, options: .transitionCrossDissolve) {
+                self.window.rootViewController = root
             }
         }
         return .one(flowContributor: .contribute(

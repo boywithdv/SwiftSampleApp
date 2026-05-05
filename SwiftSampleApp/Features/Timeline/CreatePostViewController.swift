@@ -14,6 +14,8 @@ final class CreatePostViewController: UIViewController {
     private let viewModel: CreatePostViewModel
     private let disposeBag = DisposeBag()
     private let maxLength = 300
+    private let postButton = UIBarButtonItem(title: "投稿", style: .done, target: nil, action: nil)
+    private let cancelButton = UIBarButtonItem(title: "キャンセル", style: .plain, target: nil, action: nil)
 
     // MARK: - UI Components
 
@@ -75,14 +77,9 @@ final class CreatePostViewController: UIViewController {
         view.backgroundColor = AppTheme.Color.background
         title = "新しい投稿"
 
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            title: "キャンセル", style: .plain, target: self, action: nil
-        )
-        navigationItem.leftBarButtonItem?.tintColor = AppTheme.Color.textSecondary
+        cancelButton.tintColor = AppTheme.Color.textSecondary
+        navigationItem.leftBarButtonItem = cancelButton
 
-        let postButton = UIBarButtonItem(
-            title: "投稿", style: .done, target: self, action: nil
-        )
         postButton.tintColor = AppTheme.Color.primary
         navigationItem.rightBarButtonItem = postButton
 
@@ -121,18 +118,18 @@ final class CreatePostViewController: UIViewController {
             .bind(to: characterCountLabel.rx.text)
             .disposed(by: disposeBag)
 
-        navigationItem.rightBarButtonItem?.rx.tap
+        postButton.rx.tap
             .bind(to: viewModel.submitTrigger)
             .disposed(by: disposeBag)
 
-        navigationItem.leftBarButtonItem?.rx.tap
+        cancelButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 self?.dismiss(animated: true)
             })
             .disposed(by: disposeBag)
 
         viewModel.isFormValid
-            .bind(to: navigationItem.rightBarButtonItem!.rx.isEnabled)
+            .bind(to: postButton.rx.isEnabled)
             .disposed(by: disposeBag)
 
         viewModel.postSuccess

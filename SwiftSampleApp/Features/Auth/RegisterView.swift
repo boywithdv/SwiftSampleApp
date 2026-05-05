@@ -10,16 +10,18 @@ struct RegisterView: View {
     @State private var showError = false
 
     var body: some View {
-        ZStack {
-            registerBackground
-            ScrollView {
-                VStack(spacing: 0) {
-                    Spacer().frame(height: UIScreen.main.bounds.height * 0.06)
-                    logoArea
-                    Spacer().frame(height: 32)
-                    formArea
+        GeometryReader { geometry in
+            ZStack {
+                registerBackground
+                ScrollView {
+                    VStack(spacing: 0) {
+                        Spacer().frame(height: geometry.size.height * 0.06)
+                        logoArea
+                        Spacer().frame(height: 32)
+                        formArea
+                    }
+                    .padding(.horizontal, 28)
                 }
-                .padding(.horizontal, 28)
             }
         }
         .ignoresSafeArea()

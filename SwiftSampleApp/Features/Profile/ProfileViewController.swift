@@ -62,8 +62,6 @@ final class ProfileViewController: UIViewController {
         let layout = UICollectionViewFlowLayout()
         layout.minimumInteritemSpacing = 2
         layout.minimumLineSpacing = 2
-        let size = (UIScreen.main.bounds.width - 4) / 3
-        layout.itemSize = CGSize(width: size, height: size)
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.backgroundColor = AppTheme.Color.background
         cv.register(PostGridCell.self, forCellWithReuseIdentifier: PostGridCell.reuseIdentifier)
@@ -88,6 +86,13 @@ final class ProfileViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         bindViewModel()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        guard let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else { return }
+        let size = (collectionView.bounds.width - 4) / 3
+        layout.itemSize = CGSize(width: size, height: size)
     }
 
     // MARK: - UI Setup

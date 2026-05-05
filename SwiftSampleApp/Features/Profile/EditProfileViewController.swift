@@ -16,6 +16,8 @@ final class EditProfileViewController: UIViewController {
 
     // MARK: - UI Components
 
+    private let saveButton = UIBarButtonItem(title: "保存", style: .done, target: nil, action: nil)
+    private let cancelButton = UIBarButtonItem(title: "キャンセル", style: .plain, target: nil, action: nil)
     private let displayNameField = AuthTextField(placeholder: "表示名")
 
     private let activityIndicator: UIActivityIndicatorView = {
@@ -49,15 +51,11 @@ final class EditProfileViewController: UIViewController {
         view.backgroundColor = AppTheme.Color.background
         title = "プロフィール編集"
 
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            title: "キャンセル", style: .plain, target: self, action: nil
-        )
-        navigationItem.leftBarButtonItem?.tintColor = AppTheme.Color.textSecondary
+        cancelButton.tintColor = AppTheme.Color.textSecondary
+        navigationItem.leftBarButtonItem = cancelButton
 
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            title: "保存", style: .done, target: self, action: nil
-        )
-        navigationItem.rightBarButtonItem?.tintColor = AppTheme.Color.primary
+        saveButton.tintColor = AppTheme.Color.primary
+        navigationItem.rightBarButtonItem = saveButton
 
         displayNameField.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(displayNameField)
@@ -84,18 +82,18 @@ final class EditProfileViewController: UIViewController {
             .bind(to: viewModel.displayNameRelay)
             .disposed(by: disposeBag)
 
-        navigationItem.rightBarButtonItem?.rx.tap
+        saveButton.rx.tap
             .bind(to: viewModel.saveTrigger)
             .disposed(by: disposeBag)
 
-        navigationItem.leftBarButtonItem?.rx.tap
+        cancelButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 self?.dismiss(animated: true)
             })
             .disposed(by: disposeBag)
 
         viewModel.isFormValid
-            .bind(to: navigationItem.rightBarButtonItem!.rx.isEnabled)
+            .bind(to: saveButton.rx.isEnabled)
             .disposed(by: disposeBag)
 
         viewModel.saveSuccess

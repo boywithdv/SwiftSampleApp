@@ -13,66 +13,66 @@ struct SwiperView: View {
     @State private var rotation: Double = 0
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                Color.appBackground.ignoresSafeArea()
+        ZStack {
+            Color.appBackground.ignoresSafeArea()
 
-                if viewModel.isFetching {
-                    ProgressView().scaleEffect(1.5)
+            if viewModel.isFetching {
+                ProgressView().scaleEffect(1.5)
 
-                } else if viewModel.isEmpty {
-                    emptyStateView
+            } else if viewModel.isEmpty {
+                emptyStateView
 
-                } else {
-                    VStack(spacing: 0) {
-                        cardStack
-                            .frame(maxHeight: .infinity)
-                        actionButtons
-                            .padding(.bottom, 28)
-                    }
+            } else {
+                VStack(spacing: 0) {
+                    cardStack
+                        .frame(maxHeight: .infinity)
+                    actionButtons
+                        .padding(.bottom, 28)
                 }
             }
-            .navigationTitle("スワイプ")
-            .navigationBarTitleDisplayMode(.inline)
         }
     }
 
     // MARK: - Card Stack
 
     private var cardStack: some View {
-        ZStack {
-            ForEach(viewModel.cards.reversed()) { user in
-                if user.uid == viewModel.cards.last?.uid {
-                    UserCardView(user: user, onProfile: { viewModel.tapProfile(user: user) })
-                        .frame(width: UIScreen.main.bounds.width - 40, height: 440)
-                        .offset(offset)
-                        .rotationEffect(.degrees(rotation))
-                        .gesture(
-                            DragGesture(minimumDistance: 10)
-                                .onChanged { g in
-                                    offset = g.translation
-                                    rotation = Double(g.translation.width / 20)
-                                }
-                                .onEnded { g in
-                                    let threshold: CGFloat = 100
-                                    if g.translation.width > threshold {
-                                        swipeRight(user: user)
-                                    } else if g.translation.width < -threshold {
-                                        swipeLeft(user: user)
-                                    } else {
-                                        withAnimation(.spring()) { offset = .zero; rotation = 0 }
+        GeometryReader { geometry in
+            let cardWidth = geometry.size.width - 40
+            ZStack {
+                ForEach(viewModel.cards.reversed()) { user in
+                    if user.uid == viewModel.cards.last?.uid {
+                        UserCardView(user: user, onProfile: { viewModel.tapProfile(user: user) })
+                            .frame(width: cardWidth, height: 440)
+                            .offset(offset)
+                            .rotationEffect(.degrees(rotation))
+                            .gesture(
+                                DragGesture(minimumDistance: 10)
+                                    .onChanged { g in
+                                        offset = g.translation
+                                        rotation = Double(g.translation.width / 20)
                                     }
-                                }
-                        )
-                        .animation(.spring(), value: offset)
-                        .overlay(swipeIndicators)
-                } else {
-                    UserCardView(user: user, onProfile: {})
-                        .frame(width: UIScreen.main.bounds.width - 40, height: 440)
-                        .scaleEffect(0.95)
-                        .opacity(0.8)
+                                    .onEnded { g in
+                                        let threshold: CGFloat = 100
+                                        if g.translation.width > threshold {
+                                            swipeRight(user: user)
+                                        } else if g.translation.width < -threshold {
+                                            swipeLeft(user: user)
+                                        } else {
+                                            withAnimation(.spring()) { offset = .zero; rotation = 0 }
+                                        }
+                                    }
+                            )
+                            .animation(.spring(), value: offset)
+                            .overlay(swipeIndicators)
+                    } else {
+                        UserCardView(user: user, onProfile: {})
+                            .frame(width: cardWidth, height: 440)
+                            .scaleEffect(0.95)
+                            .opacity(0.8)
+                    }
                 }
             }
+            .frame(maxWidth: .infinity)
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)

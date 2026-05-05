@@ -10,7 +10,7 @@ struct EditProfileView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 24) {
                 AvatarView(url: nil, initials: viewModel.displayName.initials, size: 80)
                     .padding(.top, 32)
