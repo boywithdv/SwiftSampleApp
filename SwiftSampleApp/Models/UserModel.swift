@@ -19,6 +19,20 @@ struct UserModel: Codable, Equatable, Identifiable {
 
     static let collectionName = "users"
 
+    // Flutter 側で phoneNumber など追加フィールドがある場合や、
+    // 一部ドキュメントで displayName 等が欠落している場合に備えたフォールバックデコード
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        uid         = try c.decode(String.self, forKey: .uid)
+        email       = (try? c.decode(String.self, forKey: .email))     ?? ""
+        displayName = (try? c.decode(String.self, forKey: .displayName)) ?? ""
+        photoUrl    = (try? c.decode(String.self, forKey: .photoUrl))  ?? ""
+        followers   = (try? c.decode([String].self, forKey: .followers)) ?? []
+        following   = (try? c.decode([String].self, forKey: .following)) ?? []
+        latitude    = try? c.decode(Double.self, forKey: .latitude)
+        longitude   = try? c.decode(Double.self, forKey: .longitude)
+    }
+
     var initials: String {
         let parts = displayName.components(separatedBy: " ")
         let first = parts.first?.prefix(1) ?? ""
